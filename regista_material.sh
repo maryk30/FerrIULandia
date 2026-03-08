@@ -6,7 +6,7 @@
 #####################################################################################
 ## ISCTE-IUL: Trabalho prático de Sistemas Operativos 2025/2026, Enunciado Versão 1
 ##
-## Aluno: Nº:       Nome:
+## Aluno: Nº:141820       Nome:Shreya Mary Kurien
 ## Nome do Módulo: regista_material.sh
 ## Descrição/Explicação do Módulo:
 ##
