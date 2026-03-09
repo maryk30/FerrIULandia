@@ -5,10 +5,25 @@
 ## Nome do Módulo: S3.2 cron.def
 ## Descrição/Explicação do Módulo:
 ##
+## Configure sysytem to execute everyday from Monday to Saturday including
+## holidays, at 0001h
 ##
-## Explicação de quais os comandos a usar para configurar o seu sistema Linux
-## usando este ficheiro:
+## Cron format:
+## minute hour day_of_month month day_of_week command
 ##
+## In this file:
+## 1 0 * * 1-6 ./manutencao.sh
+## meaning:
+## minute = 1
+## hour = 0
+## day_of_month = * (everyday)
+## month = * (each month)
+## day_of_week = 1-6 (monday to saturday)
+## command = ./manutencao.sh
+##
+## shell command:
+## crontab cron.def
 ##
 #####################################################################################
 
+1 0 * * 1-6 ./manutencao.sh
