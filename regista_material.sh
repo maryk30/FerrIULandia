@@ -24,7 +24,7 @@ s1_1_ValidaArgumentos () {
     # Validate number of arguments is either 2 or 3
     so_debug "< {no_arguments:$no_arguments; material:$material; price_per_kg:$price_per_kg; daily_limit:$daily_limit}"
 
-    if [[ $no_arguments < 2 || $no_arguments > 3 ]]; then
+    if [[ $no_arguments -lt 2 || $no_arguments -gt 3 ]]; then
         so_error 1.1.1 "No. of arguments is invalid."
         exit 1
     else
@@ -37,7 +37,7 @@ s1_1_ValidaArgumentos () {
     material_str_len=${#material}
     so_debug "< {material:$material; material_str_len:$material_str_len}"
 
-        if [[ $material_str_len < 2 || $material =~ [^a-zA-Z] ]]; then
+        if [[ $material_str_len -lt 2 || $material =~ [^a-zA-Z] ]]; then
             so_error 1.1.2 "STR: 'material' is invalid."
             exit 1
         else
