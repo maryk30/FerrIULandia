@@ -1,0 +1,6 @@
+MENU:
+1: Register Material
+2: Register Sale
+3: Maintenance
+4: Statistics
+0: Exit

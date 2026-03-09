@@ -1,0 +1,5 @@
+1: Name of the material with the highest price
+2: Top 3 materials with the highest sales(kg) in the current month
+3: Name of last month's scrap king
+4: List of salespeople who made the most sales.
+5: All of the above, in the indicated order
