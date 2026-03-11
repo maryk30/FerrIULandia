@@ -23,12 +23,14 @@ s3_1_Manutencao () {
 
     if [ -f materiais.txt ]; then
         if [ -r materiais.txt ] && [ -w materiais.txt ]; then
-            so_success 3.1.1 "materiais.txt exists with read/write permissions."
+            :
         else
-            so_error 3.1.1 "materiais.txt exists without read/write permissions."
+            so_error S3.1 "materiais.txt exists without read/write permissions."
+            exit 1
         fi
     else
-        so_error 3.1.1 "materiais.txt does not exist"
+        so_error S3.1 "materiais.txt does not exist"
+        exit 1
     fi
 
     so_debug ">"
@@ -37,9 +39,10 @@ s3_1_Manutencao () {
 
     if [ -f vendas.txt ]; then
         if [ -r vendas.txt ] && [ -w vendas.txt ]; then
-            so_success 3.1.1 "vendas.txt exists with read/write permissions."
+            :
         else
-            so_error 3.1.1 "vendas.txt exists without read/write permissions."
+            so_error S3.1 "vendas.txt exists without read/write permissions."
+            exit 1
         fi
     fi
 
@@ -66,16 +69,16 @@ s3_1_Manutencao () {
         so_debug "< {material:$material;daily_limit:$daily_limit;weight_sold:$weight_sold}"
 
         if (( weight_sold == daily_limit )); then
-            new_limit=$((daily_limit + 100))
+            if [ -n "$daily_limit" ]; then
+                new_limit=$((daily_limit + 100))
 
-            # update the limit in materiais.txt
-            awk -F ";" -v mat="$material" -v new="$new_limit" '
-            BEGIN{OFS=";"}
-            $1==mat {$3=new}
-            {print}
-            ' materiais.txt > temp && mv temp materiais.txt
-
-            so_success 2.X "Daily limit for $material increased to $new_limit"
+                # update the limit in materiais.txt
+                awk -F ";" -v mat="$material" -v new="$new_limit" '
+                BEGIN{OFS=";"}
+                $1==mat {$3=new}
+                {print}
+                ' materiais.txt > temp && mv temp materiais.txt
+            fi
         fi
 
     done < materiais.txt
@@ -86,6 +89,8 @@ main () {
     so_debug "<"
 
     s3_1_Manutencao
+
+    so_success S3.1 "s3_1_Manutencao executed succesfully"
 
     so_debug ">"
 }

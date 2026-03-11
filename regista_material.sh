@@ -25,10 +25,8 @@ s1_1_ValidaArgumentos () {
     so_debug "< {no_arguments:$no_arguments; material:$material; price_per_kg:$price_per_kg; daily_limit:$daily_limit}"
 
     if [[ $no_arguments -lt 2 || $no_arguments -gt 3 ]]; then
-        so_error 1.1.1 "No. of arguments is invalid."
+        so_error S1.1  "No. of arguments is invalid."
         exit 1
-    else
-        so_success 1.1.1 "No. of arguments is valid!"
     fi
 
     so_debug ">"
@@ -37,11 +35,9 @@ s1_1_ValidaArgumentos () {
     material_str_len=${#material}
     so_debug "< {material:$material; material_str_len:$material_str_len}"
 
-        if [[ $material_str_len -lt 2 || $material =~ [^a-zA-Z] ]]; then
-            so_error 1.1.2 "STR: 'material' is invalid."
+        if [[ $material_str_len -lt 2 ]]; then
+            so_error S1.1 "STR: '$material' is invalid."
             exit 1
-        else
-            so_success 1.1.2 "STR: 'material' is valid!"
         fi
 
     so_debug ">"
@@ -49,10 +45,8 @@ s1_1_ValidaArgumentos () {
     #Validare variable "price_per_kg"
     so_debug "< {price_per_kg:$price_per_kg}"
 
-    if [[ $price_per_kg =~ ^[0-9]+$ ]]; then
-        so_success 1.1.3 "INT: 'price_per_kg' is valid!"
-    else
-        so_error 1.1.3 "INT: 'price_per_kg' is invalid."
+    if [[ ! "$price_per_kg" =~ ^[1-9][0-9]*$ ]]; then
+        so_error S1.1 "INT: 'price_per_kg' is invalid."
         exit 1
     fi
 
@@ -61,17 +55,14 @@ s1_1_ValidaArgumentos () {
     #Validate variable "daily_limit"
     so_debug "< {daily_limit:$daily_limit}"
 
-    if [ -z "$daily_limit" ]; then
-        so_debug "daily_limit does not exist >"
-    else
-        so_debug "< daily_limit exists"
-        if [[ $daily_limit =~ ^[0-9]+$ ]]; then
-            so_success 1.1.4 "INT: 'daily_limit' is valid!"
-        else
-            so_error 1.1.4 "INT: 'daily_limit' is invalid."
+    if [[ $no_arguments -eq 3 ]]; then
+        if [[ -z "$daily_limit" || ! "$daily_limit" =~ ^[1-9][0-9]*$ ]]; then
+            so_error S1.1
+            exit 1
         fi
     fi
 
+    so_success S1.1 "s1_1_ValidaArgumentos executed succesfully"
     so_debug ">"
 }
 
@@ -80,25 +71,30 @@ s1_1_ValidaArgumentos () {
 ## */
 s1_2_ValidaMaterial () {
     # Declaration of Arguments
-    no_arguments=$#; material=$1
+    no_arguments=$#; material=$1; price_per_kg=$2; daily_limit=$3
 
     # Check whether materiais.txt exists
     so_debug "< materiais.txt"
 
     if [ -f materiais.txt ]; then
-        so_success 1.2.1 "materiais.txt exists!"
+        :
     else
-        so_error 1.2.1 "materiais.txt does not exist."
+        so_error S1.2 "materiais.txt does not exist."
         touch materiais.txt
-        so_success 1.2.1 "materiais.txt has been created!"
+        if [ -f materiais.txt ]; then 
+            :
+        else
+            so_error S1.2 "materiais.txt could not be created!"
+            exit 1
+        fi
     fi
 
     # Check permissions for materiais.txt
 
     if [ -r materiais.txt ] && [ -w materiais.txt ]; then
-        so_success 1.2.1 "Permissions valid!"
+        :
     else
-        so_error 1.2.1 "materiais.txt does not have read/write permissions. Terminating..."
+        so_error S1.2 "materiais.txt does not have read/write permissions. Terminating..."
         exit 1
     fi
 
@@ -107,13 +103,15 @@ s1_2_ValidaMaterial () {
     #Check whether variable 'material' exists in materiais.txt
 
     so_debug "< {no_arguments:$no_arguments; material:$material}"
+    check_material=$(awk -F';' -v mat="$material" '$1==mat {found=1; exit} END{if(found) print 1; else print 0}' materiais.txt)
 
-    if grep -q $material materiais.txt; then
-        so_success 1.2.2 "$material exists in materiais.txt"
+    if [[ "$check_material" == 1 ]]; then
+        so_success S1.2 "s1_2_ValidaMaterial executed succesfully"
         s1_4_ListaMaterial
     else
-        so_error 1.2.2 "$material does not exist in materiais.txt"
-        s1_3_AdicionaMaterial $material $price_per_kg $daily_limit
+        so_error S1.2 "$material does not exist in materiais.txt"
+        echo "Arguments: $@"
+        s1_3_AdicionaMaterial "$material" $price_per_kg $daily_limit
     fi
 
     so_debug ">"
@@ -128,14 +126,14 @@ s1_3_AdicionaMaterial () {
 
     # Add material to materiais.txt
     so_debug "< material:$material"
-    echo $material";"$price_per_kg";"$daily_limit>> materiais.txt
-
-    if grep -q $material materiais.txt; then 
-        so_success 1.3 "$material added to materiais.txt"
-        s1_4_ListaMaterial
+    if [ -n "$daily_limit" ]; then
+        echo "$material;$price_per_kg;$daily_limit" >> materiais.txt
     else
-        so_error 1.3 "Addition of $material failed."
+        echo "$material;$price_per_kg" >> materiais.txt
     fi
+    so_success S1.3 "s1_3_AdicionaMaterial executed succesfully"
+    s1_4_ListaMaterial
+    
 
     so_debug ">"
 }
@@ -151,25 +149,24 @@ s1_4_ListaMaterial () {
 
     #Create file materiais-ordenados-preco.txt
     cp materiais.txt materiais-ordenados-preco.txt 
-    sort -n -k2 materiais-ordenados-preco.txt -o materiais-ordenados-preco.txt
+    sort -t";" -k2 -n materiais-ordenados-preco.txt -o materiais-ordenados-preco.txt
 
     if [ -f materiais-ordenados-preco.txt ]; then
-        so_success 1.4 "materiais-ordenados-preco.txt created succesfully"
+        so_success S1.4 "Successfully created materiais-ordenados-preco.txt"
     else
-        so_error 1.4 "failed to create file materiais-ordenados-preco.txt"
+        so_error S1.4 "failed to create file materiais-ordenados-preco.txt"
+    fi
 
     so_debug ">"
-    fi
 }
 
 main () {
-    no_arguments=$#; material=$1; price_per_kg=$2; daily_limit=$3
 
     so_debug "<"
 
-    s1_1_ValidaArgumentos $material $price_per_kg $daily_limit
-    s1_2_ValidaMaterial $material
+    s1_1_ValidaArgumentos "$@"
+    s1_2_ValidaMaterial "$@"
 
     so_debug ">"
 }
-main $@
+main "$@"

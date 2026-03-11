@@ -93,7 +93,6 @@ s5_3_Opcao1 () {
     read -p "Input Daily limit: " daily_limit
 
     ./regista_material.sh "$material" $price_per_kg $daily_limit
-    so_success 5.3 "Executed: Option 1"
     s5_1_MostraMenu
 
     so_debug ">"
@@ -111,7 +110,6 @@ s5_4_Opcao2 () {
     read -p "Input weight (in kg): " weight_in_kg
 
     if./regista_venda.sh "$name_of_seller" "$material" $weight_in_kg
-    so_success 5.4 "Executed: Option 2"
     s5_1_MostraMenu
 
     so_debug ">"
@@ -126,7 +124,6 @@ s5_5_Opcao3 () {
     echo "Maintenance"
 
     ./manutencao.sh
-    so_success 5.5 "Executed: Option 3"
     s5_1_MostraMenu
 
     so_debug ">"
@@ -154,7 +151,6 @@ s5_6_Opcao4 () {
 
     so_debug ">"
 
-    so_success 5.6 "Success: Option 4"
     s5_1_MostraMenu
 }
 

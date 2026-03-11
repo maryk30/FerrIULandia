@@ -23,11 +23,9 @@ s2_1_ValidaArgumentos () {
     # Validate number of arguments is exactly 3
     so_debug "< {no_arguments:$no_arguments; name_of_seller:$name_of_seller; material:$material; weight_in_kg:$weight_in_kg}"
 
-    if [[ $no_arguments != 3 ]]; then
-        so_error 2.1.1 "No. of arguments is invalid."
+    if [[ ! $no_arguments == 3 ]]; then
+        so_error S2.1 "No. of arguments is invalid."
         exit 1
-    else
-        so_success 1.1.1 "Valid no. of arguments!"
     fi
 
     so_debug ">"
@@ -35,10 +33,10 @@ s2_1_ValidaArgumentos () {
     #Validate variable "weight_in_kg"
     so_debug "< {weight_in_kg:$weight_in_kg}"
 
-    if [[ $weight_in_kg =~ ^[0-9]+$ ]]; then
-        so_success 2.1.2 "weight_in_kg is a positive integer."
+    if [[ $weight_in_kg =~ ^[1-9][0-9]*$ ]]; then
+        :
     else
-        so_error 2.1.2 "weight_in_kg has an invalid value."
+        so_error S2.1 "weight_in_kg has an invalid value."
         exit 1
     fi
 
@@ -48,20 +46,17 @@ s2_1_ValidaArgumentos () {
     so_debug "< {name_of_seller:$name_of_seller;material:$material}"
 
         if [[ "$name_of_seller" =~ [^a-zA-Z\ ] ]]; then
-            so_error 2.1.3 "STR: 'name_of_seller' is invalid."
+            so_error S2.1 "STR: 'name_of_seller' is invalid."
             exit 1
-        else
-            so_success 2.1.3 "STR: 'name_of_seller' is valid!"
         fi
 
         if [[ "$material" =~ [^a-zA-Z\ ] ]]; then
-            so_error 2.1.3 "STR: 'material' is invalid."
+            so_error S2.1 "STR: 'material' is invalid."
             exit 1
-        else
-            so_success 2.1.3 "STR: 'material' is valid!"
         fi
 
     so_debug ">"
+    so_success S2.1 "s2_1_ValidaArgumentos has been executed successfully"
 
 }
 
@@ -76,16 +71,15 @@ s2_2_ValidaVenda () {
     so_debug "< vendas.txt"
 
     if [ -f vendas.txt ]; then
-        so_success 2.2.1 "File vendas.txt exists!"
         if [ -r vendas.txt ] && [ -w vendas.txt ]; then
-            so_success 2.2.1 "vendas.txt has read/write permissions."
+            :
         else
-            so_error 2.2.1 "vendas.txt does not have read/write permissions."
+            so_error S2.2 "vendas.txt does not have read/write permissions."
             exit 1
         fi
     else
+        so_error S2.2 "vendas.txt does not exist"
         touch vendas.txt
-        so_success 2.2.1 "vendas.txt has been created!"
     fi
 
     so_debug ">"
@@ -94,9 +88,9 @@ s2_2_ValidaVenda () {
     so_debug "< {no_arguments:$no_arguments;material:$material}"
 
     if grep -q "$material" materiais.txt; then
-        so_success 2.2.2 "$material exists in materiais.txt"
+        :
     else
-        so_error 2.2.2 "$material does not exist in materiais.txt"
+        so_error S2.2 "$material does not exist in materiais.txt"
         exit 1
     fi
 
@@ -114,14 +108,14 @@ s2_2_ValidaVenda () {
 
     so_debug "< {material:$material;daily_limit:$daily_limit;weight_sold:$weight_sold;weight_in_kg:$weight_in_kg}"
 
-    if (( $weight_sold + $weight_in_kg > $daily_limit )); then
-        remaining=$((daily_limit - weight_sold))
-
-        so_error 2.2.3 "weight_in_kg exceeds daily_limit"
-        exit 1
+    if [[ -n "$daily_limit" ]]; then
+        if (( weight_sold + weight_in_kg > daily_limit )); then
+            remaining=$((daily_limit - weight_sold))
+            so_error S2.2 "weight_in_kg exceeds daily_limit"
+            exit 1
+        fi
     fi
 
-    so_success 2.2.3 "weight_in_kg is valid!"
 
     so_debug ">"
 
@@ -142,13 +136,13 @@ s2_2_ValidaVenda () {
     END {exit !found}
 
     ' /etc/passwd; then
-
-        so_success 2.2.4 "Name of seller is valid!"
+        :
     else
-        so_error 2.2.4 "Name of seller does not correspond with registered users."
+        so_error S2.2 "Name of seller does not correspond with registered users."
         exit 1
     fi
 
+    so_success S2.2 "s2_2_ValidaVenda has been executed succesfully"
     so_debug ">" 
 }
 
@@ -167,12 +161,13 @@ s2_3_AdicionaVenda () {
     echo "$name_of_seller"";""$material"";"$weight_in_kg";"$timestamp >> vendas.txt
 
     if [[ $? == 0 ]]; then
-        so_success 2.3 "Sale recorded successfully in vendas.txt"
+        :
     else
-        so_error 2.3 "Failed to write sale to vendas.txt"
+        so_error S2.3 "Failed to write sale to vendas.txt"
         exit 1
     fi
 
+    so_success S2.3 "s2_3_AdicionaVenda has been executed succesfully!"
     so_debug ">"
 }
 
@@ -181,9 +176,9 @@ main () {
 
     so_debug "< main"
 
-    s2_1_ValidaArgumentos "$name_of_seller" "$material" $weight_in_kg
-    s2_2_ValidaVenda "$name_of_seller" "$material" $weight_in_kg
-    s2_3_AdicionaVenda "$name_of_seller" "$material" $weight_in_kg
+    s2_1_ValidaArgumentos "$@"
+    s2_2_ValidaVenda "$@"
+    s2_3_AdicionaVenda "$@"
 
     so_debug ">"
 }
