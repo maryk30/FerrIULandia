@@ -2,4 +2,4 @@ Ferro;1;1000
 Aluminio;2;100
 Cobre Novo;20;100
 Cobre Velho;13;750
-iron;1000;850;
+
